@@ -5,19 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.ulyanenko.shopinglist.R
 import com.ulyanenko.shopinglist.domain.ShopItem
 
-class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopListViewHolder>() {
-
-    var shopList = listOf<ShopItem>()
-        set(value) {
-            val callback = ShopListDiffCallback(shopList, value)
-            val diffResult = DiffUtil.calculateDiff(callback)
-            diffResult.dispatchUpdatesTo(this)
-            field = value
-        }
+class ShopListAdapter : ListAdapter<ShopItem, ShopListViewHolder>(ShopItemDiffCallback()) {
 
     var onShopItemLongClickListener:((shopItem:ShopItem)-> Unit)? = null
     var onShopItemClickListener:((shopItem:ShopItem)-> Unit)?= null
@@ -34,12 +27,9 @@ class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopListViewHolder>
         return ShopListViewHolder(view)
     }
 
-    override fun getItemCount(): Int {
-        return shopList.size
-    }
 
     override fun onBindViewHolder(holder: ShopListViewHolder, position: Int) {
-        val shopItem = shopList[position]
+        val shopItem = getItem(position)
 
         holder.view.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
@@ -56,7 +46,7 @@ class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopListViewHolder>
     }
 
     override fun getItemViewType(position: Int): Int {
-        val shopItem = shopList[position]
+        val shopItem = getItem(position)
         return if (shopItem.enabled) {
             ENABLE
         } else {
@@ -64,15 +54,6 @@ class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopListViewHolder>
         }
     }
 
-
-    class ShopListViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val tvName = view.findViewById<TextView>(R.id.tv_name)
-        val tvCount = view.findViewById<TextView>(R.id.tv_count)
-    }
-
-//    interface OnShopItemLongClickListener{
-//        fun onShopItemLongClick(shopItem: ShopItem)
-//    }
 
     companion object {
         const val ENABLE = 100
