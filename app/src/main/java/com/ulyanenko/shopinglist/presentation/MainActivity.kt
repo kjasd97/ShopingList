@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Adapter
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ulyanenko.shopinglist.R
 import com.ulyanenko.shopinglist.domain.ShopItem
 
@@ -17,7 +19,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
     lateinit var adapter: ShopListAdapter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +29,12 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.shopList.observe(this) {
             adapter.submitList(it)
+        }
+
+        val buttonAddItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
+        buttonAddItem.setOnClickListener {
+            val intent = ShopItemActivity.newIntentAdd(this)
+            startActivity(intent)
         }
 
 
@@ -78,7 +85,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         adapter.onShopItemClickListener = {
-            Log.d("Test1", it.toString())
+            val intent = ShopItemActivity.newIntentEdit(this, it.id)
+            startActivity(intent)
         }
     }
 
