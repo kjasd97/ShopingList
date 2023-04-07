@@ -4,4 +4,7 @@
     <string name="name">Name</string>
     <string name="count">Count</string>
     <string name="save">Save</string>
+    <string name="errorName">Error in name</string>
+    <string name="errorCount">Error in count</string>
+
 </resources>
