@@ -11,7 +11,6 @@ class ShopItemViewModel : ViewModel() {
     private val repository = ShopListRepositoryImpl
 
     private val getShopItemUseCase = GetShopItemUseCase(repository)
-    private val deleteShopItemUseCase = DeleteShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
     private val addShopItemUseCase = AddShopItemUseCase(repository)
 
@@ -37,9 +36,6 @@ class ShopItemViewModel : ViewModel() {
         _shopItem.value = shopItem
     }
 
-    fun deleteShopItem(shopItem: ShopItem) {
-        deleteShopItemUseCase.deleteShopItem(shopItem)
-    }
 
     fun addShopItem(inputName: String?, inputCount: String?) {
         val name = parseName(inputName)
