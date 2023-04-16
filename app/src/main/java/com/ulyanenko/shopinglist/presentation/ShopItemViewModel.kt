@@ -1,14 +1,17 @@
 package com.ulyanenko.shopinglist.presentation
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
 import com.ulyanenko.shopinglist.data.ShopListRepositoryImpl
 import com.ulyanenko.shopinglist.domain.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
-class ShopItemViewModel : ViewModel() {
+class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = ShopListRepositoryImpl
+    private val repository = ShopListRepositoryImpl(application)
 
     private val getShopItemUseCase = GetShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
@@ -31,9 +34,13 @@ class ShopItemViewModel : ViewModel() {
         get() = _canClose
 
 
+
+
     fun getShopItem(id: Int) {
-        val shopItem = getShopItemUseCase.getShopItem(id)
-        _shopItem.value = shopItem
+        viewModelScope.launch {
+            val shopItem = getShopItemUseCase.getShopItem(id)
+            _shopItem.value = shopItem
+        }
     }
 
 
@@ -43,9 +50,11 @@ class ShopItemViewModel : ViewModel() {
         val fieldsIsValid = validateInputType(name, count)
 
         if (fieldsIsValid) {
-            val shopItem = ShopItem(name, count, true)
-            addShopItemUseCase.addShopItem(shopItem)
-            _canClose.value=Unit
+            viewModelScope.launch {
+              val shopItem = ShopItem(name, count, true)
+              addShopItemUseCase.addShopItem(shopItem)
+              _canClose.value = Unit
+          }
         }
     }
 
@@ -56,9 +65,12 @@ class ShopItemViewModel : ViewModel() {
 
         if (fieldsIsValid) {
             _shopItem.value?.let {
-                val item = it.copy(name=name, count=count)
-                editShopItemUseCase.editShopItem(item)
-                _canClose.value =Unit
+                viewModelScope.launch {
+                    val item = it.copy(name=name, count=count)
+                    editShopItemUseCase.editShopItem(item)
+                    _canClose.value =Unit
+                }
+
             }
         }
     }
@@ -96,5 +108,7 @@ class ShopItemViewModel : ViewModel() {
     fun resetInputCountError() {
         _inputCountError.value = false
     }
+
+
 
 }
