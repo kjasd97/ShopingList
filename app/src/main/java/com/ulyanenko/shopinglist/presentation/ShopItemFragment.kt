@@ -14,13 +14,22 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.ulyanenko.shopinglist.R
+import com.ulyanenko.shopinglist.ShopApplication
 import com.ulyanenko.shopinglist.databinding.FragmentShopItemBinding
+import javax.inject.Inject
 
 class ShopItemFragment : Fragment() {
 
     private lateinit var viewModel: ShopItemViewModel
 
     private lateinit var onEditingFinishedListener: OnEditingFinishedListener
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val component by lazy {
+        (requireActivity().application as ShopApplication).component
+    }
 
 
     private var _binding:FragmentShopItemBinding? = null
@@ -31,6 +40,9 @@ class ShopItemFragment : Fragment() {
     private var shopItemId: Int = -1
 
     override fun onAttach(context: Context) {
+
+        component.inject(this)
+
         super.onAttach(context)
         if (context is OnEditingFinishedListener) {
             onEditingFinishedListener = context
@@ -56,7 +68,7 @@ class ShopItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this).get(ShopItemViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ShopItemViewModel::class.java)
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 

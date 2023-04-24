@@ -8,14 +8,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
+class ShopItemViewModel @Inject constructor(
+    private val getShopItemUseCase: GetShopItemUseCase,
+    private val editShopItemUseCase: EditShopItemUseCase,
+    private val addShopItemUseCase: AddShopItemUseCase
+) : ViewModel() {
 
-    private val repository = ShopListRepositoryImpl(application)
-
-    private val getShopItemUseCase = GetShopItemUseCase(repository)
-    private val editShopItemUseCase = EditShopItemUseCase(repository)
-    private val addShopItemUseCase = AddShopItemUseCase(repository)
 
     private val _inputNameError = MutableLiveData<Boolean>()
     val inputNameError: LiveData<Boolean>
@@ -34,8 +34,6 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         get() = _canClose
 
 
-
-
     fun getShopItem(id: Int) {
         viewModelScope.launch {
             val shopItem = getShopItemUseCase.getShopItem(id)
@@ -51,10 +49,10 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
 
         if (fieldsIsValid) {
             viewModelScope.launch {
-              val shopItem = ShopItem(name, count, true)
-              addShopItemUseCase.addShopItem(shopItem)
-              _canClose.value = Unit
-          }
+                val shopItem = ShopItem(name, count, true)
+                addShopItemUseCase.addShopItem(shopItem)
+                _canClose.value = Unit
+            }
         }
     }
 
@@ -66,9 +64,9 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         if (fieldsIsValid) {
             _shopItem.value?.let {
                 viewModelScope.launch {
-                    val item = it.copy(name=name, count=count)
+                    val item = it.copy(name = name, count = count)
                     editShopItemUseCase.editShopItem(item)
-                    _canClose.value =Unit
+                    _canClose.value = Unit
                 }
 
             }
@@ -108,7 +106,6 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
     fun resetInputCountError() {
         _inputCountError.value = false
     }
-
 
 
 }
