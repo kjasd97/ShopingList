@@ -6,15 +6,17 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.ulyanenko.shopinglist.domain.ShopItem
 import com.ulyanenko.shopinglist.domain.ShopListRepository
+import javax.inject.Inject
 
-class ShopListRepositoryImpl (application: Application): ShopListRepository {
+class ShopListRepositoryImpl @Inject constructor(
+    private val shopListDAO: ShopListDAO,
+    private val mapper: ShopItemMapper
+) : ShopListRepository {
 
-    private val shopListDAO = AppDatabase.getInstance(application).shopListDao()
-    private val mapper = ShopItemMapper()
 
 
     override suspend fun addShopItem(shopItem: ShopItem) {
-    shopListDAO.addShopItem(mapper.mapFromEntityToDbModel(shopItem))
+        shopListDAO.addShopItem(mapper.mapFromEntityToDbModel(shopItem))
     }
 
     override suspend fun deleteShopItem(shopItem: ShopItem) {
@@ -27,15 +29,16 @@ class ShopListRepositoryImpl (application: Application): ShopListRepository {
     }
 
     override suspend fun getShopItem(id: Int): ShopItem {
-       val dbModel = shopListDAO.getShopItem(id)
-       return mapper.mapFromDbModelToEntity(dbModel)
+        val dbModel = shopListDAO.getShopItem(id)
+        return mapper.mapFromDbModelToEntity(dbModel)
     }
 
-    override fun getShopList(): LiveData <List<ShopItem>> = MediatorLiveData<List<ShopItem>>().apply {
-          addSource(shopListDAO.getShopList()){
-          value =  mapper.mapListDbModelToListEntity(it)
-          }
-      }
+    override fun getShopList(): LiveData<List<ShopItem>> =
+        MediatorLiveData<List<ShopItem>>().apply {
+            addSource(shopListDAO.getShopList()) {
+                value = mapper.mapListDbModelToListEntity(it)
+            }
+        }
 
 
 }

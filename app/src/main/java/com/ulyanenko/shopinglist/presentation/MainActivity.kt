@@ -18,8 +18,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ulyanenko.shopinglist.R
+import com.ulyanenko.shopinglist.ShopApplication
 import com.ulyanenko.shopinglist.databinding.ActivityMainBinding
+import com.ulyanenko.shopinglist.di.DaggerApplicationComponent
 import com.ulyanenko.shopinglist.domain.ShopItem
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
 
@@ -27,12 +30,21 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
     lateinit var adapter: ShopListAdapter
     private lateinit var binding: ActivityMainBinding
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+   private val component by lazy {
+       (application as ShopApplication).component
+   }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+       component.inject(this)
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
 
         setupRecycleView()
 
@@ -40,11 +52,11 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
             adapter.submitList(it)
         }
 
-       binding.buttonAddShopItem.setOnClickListener {
-            if(isOnePainMode()){
-            val intent = ShopItemActivity.newIntentAdd(this)
-            startActivity(intent)
-            }else{
+        binding.buttonAddShopItem.setOnClickListener {
+            if (isOnePainMode()) {
+                val intent = ShopItemActivity.newIntentAdd(this)
+                startActivity(intent)
+            } else {
                 launchFragment(ShopItemFragment.newFragmentAdd())
             }
         }
@@ -52,11 +64,11 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
 
     }
 
-    private fun isOnePainMode():Boolean{
-        return binding.shopItemContainer==null
+    private fun isOnePainMode(): Boolean {
+        return binding.shopItemContainer == null
     }
 
-    private fun launchFragment(fragment: Fragment){
+    private fun launchFragment(fragment: Fragment) {
         supportFragmentManager.popBackStack()
         supportFragmentManager.beginTransaction()
             .replace(R.id.shop_item_container, fragment)
@@ -67,7 +79,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
     private fun setupRecycleView() {
         adapter = ShopListAdapter()
 
-       binding.rvShopList.adapter = adapter
+        binding.rvShopList.adapter = adapter
         binding.rvShopList.recycledViewPool.setMaxRecycledViews(
             R.layout.item_shop_enabled,
             ShopListAdapter.MAX_POOL
@@ -81,7 +93,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
 
         setupClickListener()
 
-        setupSwipeListener( binding.rvShopList)
+        setupSwipeListener(binding.rvShopList)
 
     }
 
@@ -109,10 +121,10 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
 
     private fun setupClickListener() {
         adapter.onShopItemClickListener = {
-            if (isOnePainMode()){
-            val intent = ShopItemActivity.newIntentEdit(this, it.id)
-            startActivity(intent)
-            } else{
+            if (isOnePainMode()) {
+                val intent = ShopItemActivity.newIntentEdit(this, it.id)
+                startActivity(intent)
+            } else {
                 supportFragmentManager.beginTransaction()
                     .add(R.id.shop_item_container, ShopItemFragment.newFragmentEdit(it.id))
             }

@@ -15,7 +15,7 @@ interface ShopListDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addShopItem(shopItemDbModel: ShopItemDbModel)
 
-    @Query("DELETE from shop_item WHERE id =:shopItemId")
+    @Query("DELETE FROM shop_item WHERE id=:shopItemId")
     suspend fun deleteShopItem(shopItemId: Int)
 
     @Query("SELECT * FROM shop_item WHERE id=:shopItemId LIMIT 1")
