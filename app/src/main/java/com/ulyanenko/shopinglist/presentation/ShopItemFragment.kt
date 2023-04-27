@@ -1,7 +1,9 @@
 package com.ulyanenko.shopinglist.presentation
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -17,6 +19,7 @@ import com.ulyanenko.shopinglist.R
 import com.ulyanenko.shopinglist.ShopApplication
 import com.ulyanenko.shopinglist.databinding.FragmentShopItemBinding
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 class ShopItemFragment : Fragment() {
 
@@ -32,9 +35,9 @@ class ShopItemFragment : Fragment() {
     }
 
 
-    private var _binding:FragmentShopItemBinding? = null
-    private val binding:FragmentShopItemBinding
-    get() = _binding ?: throw java.lang.RuntimeException("FragmentShopItemBinding == null")
+    private var _binding: FragmentShopItemBinding? = null
+    private val binding: FragmentShopItemBinding
+        get() = _binding ?: throw java.lang.RuntimeException("FragmentShopItemBinding == null")
 
     private var screeMode: String = ""
     private var shopItemId: Int = -1
@@ -82,7 +85,6 @@ class ShopItemFragment : Fragment() {
     }
 
 
-
     private fun observeFromViewModel() {
         viewModel.canClose.observe(viewLifecycleOwner) {
             onEditingFinishedListener.onEditingListener()
@@ -97,7 +99,7 @@ class ShopItemFragment : Fragment() {
     }
 
     private fun etCountListener() {
-       binding.etCount.addTextChangedListener(object : TextWatcher {
+        binding.etCount.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
@@ -111,7 +113,7 @@ class ShopItemFragment : Fragment() {
     }
 
     private fun etNameListener() {
-       binding.etName.addTextChangedListener(object : TextWatcher {
+        binding.etName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
@@ -128,14 +130,29 @@ class ShopItemFragment : Fragment() {
         viewModel.getShopItem(shopItemId)
 
         binding.saveButton.setOnClickListener {
-            viewModel.editShopItem(binding.etName.text?.toString(),binding.etCount.text?.toString())
+            viewModel.editShopItem(
+                binding.etName.text?.toString(),
+                binding.etCount.text?.toString()
+            )
         }
     }
 
     private fun launchAddMode() {
         binding.saveButton.setOnClickListener {
-            viewModel.addShopItem( binding.etName.text?.toString(), binding.etCount.text?.toString())
+            viewModel.addShopItem(binding.etName.text?.toString(), binding.etCount.text?.toString())
+//            thread {
+//                context?.contentResolver?.insert(
+//                    Uri.parse("content://com.ulyanenko.shopinglist/shop_item"),
+//                    ContentValues().apply {
+//                        put("id", 0)
+//                        put("name", binding.etName.text?.toString())
+//                        put("count", binding.etCount.text?.toString()?.toInt())
+//                        put("enabled", true)
+//                    }
+//                )
+//            }
         }
+
     }
 
     private fun parseParams() {
@@ -157,7 +174,6 @@ class ShopItemFragment : Fragment() {
             shopItemId = args.getInt(EXTRA_SHOP_ITEM_ID, -1)
         }
     }
-
 
 
     interface OnEditingFinishedListener {
