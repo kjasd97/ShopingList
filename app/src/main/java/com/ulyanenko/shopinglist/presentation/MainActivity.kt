@@ -72,10 +72,10 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
                 null
             )
             while (cursor?.moveToNext() == true) {
-                val id = cursor.getInt(cursor.getColumnIndex("id"))
-                val name = cursor.getString(cursor.getColumnIndex("name"))
-                val count = cursor.getInt(cursor.getColumnIndex("count"))
-                val enabled = cursor.getInt(cursor.getColumnIndex("enabled"))>0
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+                val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
+                val enabled = cursor.getInt(cursor.getColumnIndexOrThrow("enabled")) > 0
 
                 val shopItem = ShopItem(
                     id = id,
@@ -84,8 +84,8 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
                     enabled = enabled
                 )
                 Log.d("test2", shopItem.toString())
-
             }
+            cursor?.close()
         }
     }
 
@@ -135,6 +135,13 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val item = adapter.currentList[viewHolder.adapterPosition]
                 viewModel.deleteShopItem(item)
+//                thread {
+//                    contentResolver.delete(
+//                        Uri.parse("content://com.ulyanenko.shopinglist/shop_item"),
+//                        null,
+//                        arrayOf(item.id.toString())
+//                    )
+//                }
             }
 
         }
