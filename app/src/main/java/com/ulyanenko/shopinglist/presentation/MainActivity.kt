@@ -1,5 +1,6 @@
 package com.ulyanenko.shopinglist.presentation
 
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +24,7 @@ import com.ulyanenko.shopinglist.databinding.ActivityMainBinding
 import com.ulyanenko.shopinglist.di.DaggerApplicationComponent
 import com.ulyanenko.shopinglist.domain.ShopItem
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
 
@@ -33,12 +35,12 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-   private val component by lazy {
-       (application as ShopApplication).component
-   }
+    private val component by lazy {
+        (application as ShopApplication).component
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-       component.inject(this)
+        component.inject(this)
 
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -60,8 +62,31 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
                 launchFragment(ShopItemFragment.newFragmentAdd())
             }
         }
+        thread {
+            val cursor = contentResolver.query(
+                Uri.parse("content://com.ulyanenko.shopinglist/shop_item"),
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+            while (cursor?.moveToNext() == true) {
+                val id = cursor.getInt(cursor.getColumnIndex("id"))
+                val name = cursor.getString(cursor.getColumnIndex("name"))
+                val count = cursor.getInt(cursor.getColumnIndex("count"))
+                val enabled = cursor.getInt(cursor.getColumnIndex("enabled"))>0
 
+                val shopItem = ShopItem(
+                    id = id,
+                    name = name,
+                    count = count,
+                    enabled = enabled
+                )
+                Log.d("test2", shopItem.toString())
 
+            }
+        }
     }
 
     private fun isOnePainMode(): Boolean {
